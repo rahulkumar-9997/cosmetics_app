@@ -128,6 +128,7 @@ class MenuController extends Controller
     public function destroy(Menu $menu)
     {
         try {
+            //return response()->json($menu->roles());
             DB::beginTransaction();
             if ($menu->roles()->exists()) {
                 return redirect()->route('menus.index')->with('error', 'Cannot delete menu because it is assigned to one or more roles.');
@@ -150,6 +151,7 @@ class MenuController extends Controller
 
     private function deleteChildren($menu)
     {
+        
         if ($menu->roles()->exists()) {
             throw new \Exception("Cannot delete '{$menu->name}' because it is assigned to a role.");
         }

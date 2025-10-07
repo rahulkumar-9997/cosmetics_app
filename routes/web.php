@@ -198,23 +198,8 @@ Route::middleware(['auth', 'check.menu'])->group(function () {
     Route::get('/autocomplete/products', [ProductsController::class, 'autocompleteProducts'])->name('autocomplete.products');
     /*AUTOCOMPLETE ROUTE*/
     /**Customer route */
-    Route::get('manage-customer', [CustomerControllerBackend::class, 'index'])->name('manage-customer');
-    Route::post('manage-customer/add', [CustomerControllerBackend::class, 'addNewCustomerModalForm'])->name('manage-customer.add');
-    Route::post('manage-customer/add/submit', [CustomerControllerBackend::class, 'addNewCustomerModalFormSubmit'])->name('manage-customer.add.submit');
-    Route::get('manage-customer/edit/{id}', [CustomerControllerBackend::class, 'editCustomerForm'])->name('manage-customer.edit');
-    Route::post('manage-customer/update/{id}', [CustomerControllerBackend::class, 'editCustomerFormSubmit'])->name('manage-customer.update');
-    Route::get('customer-details/{id}', [CustomerControllerBackend::class, 'showCustomerDetails'])->name('customer-details');
-    Route::get('customer-wishlist/{id}', [CustomerControllerBackend::class, 'showCustomerWishlist'])->name('customer-wishlist');
+    Route::get('manage-customer', [CustomerControllerBackend::class, 'index'])->name('manage-customer');    
     
-    Route::get('customer-care-request', [CustomerControllerBackend::class, 'customerCareRequestList'])->name('customer-care-request');
-    Route::delete('customer-care-request/destroy/{id}', [CustomerControllerBackend::class, 'customerCareRequestDelete'])->name('customer-care-request.destroy');
-
-    
-    Route::get('customer-orders/{id}', [CustomerControllerBackend::class, 'showCustomerOrdersList'])->name('customer-orders');
-    Route::delete('manage-customer/delete/{id}', [CustomerControllerBackend::class, 'customerDelete'])->name('manage-customer.delete');
-    Route::get('/customer/import', [CustomerControllerBackend::class, 'importForm'])->name('customer.importForm');
-    Route::post('/customer/import', [CustomerControllerBackend::class, 'importFormSubmit'])->name('customer.import');
-    Route::post('update-customer-group', [CustomerControllerBackend::class, 'updateCustomerGroup'])->name('update-customer-group');
     Route::get('manage-group', [GroupController::class, 'groupList'])->name('manage-group');
     Route::get('add-new-group', [GroupController::class, 'addNewGrupModal'])->name('add-new-group');
     Route::Post('add-new-group/submit', [GroupController::class, 'addNewGrupModalSubmit'])->name('add-new-group.submit');
