@@ -148,7 +148,7 @@
                             <button type="submit" class="btn btn-success px-4">Create</button>
                             <a href="{{ route('manage-customer.index') }}" class="btn btn-secondary px-4">Cancel</a>
                         </div>
-                        <!-- <div class="mb-3">
+                        <div class="mb-3">
                         <label class="form-label">Permanent Address</label>
                         <textarea name="permanent_address" class="form-control" id="permanent_address" rows="3">{{ old('permanent_address') }}</textarea>
                     </div>
@@ -158,7 +158,7 @@
                         <div id="map" style="height: 300px; margin-top:10px;"></div>
                     </div>
                     <input type="text" name="latitude" id="latitude">
-                    <input type="text" name="longitude" id="longitude"> -->
+                    <input type="text" name="longitude" id="longitude">
                     </form>
 
                 </div>
@@ -168,7 +168,7 @@
 </div>
 @endsection
 @push('scripts')
-<!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmvGbMx-92VviaYr2IvzjCyC4-DVEzQCU&libraries=marker   "></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmvGbMx-92VviaYr2IvzjCyC4-DVEzQCU&libraries=marker   "></script>
 <script>
     let map;
     let marker;
@@ -223,7 +223,7 @@
         });
     }
     window.onload = initMap;
-</script> -->
+</script>
 
 
 @endpush
