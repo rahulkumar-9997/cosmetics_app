@@ -14,21 +14,10 @@
                <h4 class="card-title flex-grow-1">
                   All Customer List
                </h4>
-               <a href="javascript:void(0)" data-addCustomer-popup="true" data-size="lg" data-title=" Add new Customer" data-url="{{route('manage-customer.add')}}" data-bs-toggle="tooltip" class="btn btn-sm btn-purple" data-bs-original-title=" Add new Customer">
+               <a href="{{route('manage-customer.create')}}" data-bs-toggle="tooltip" class="btn btn-sm btn-purple" data-bs-original-title=" Add new Customer">
                   Add new Customer
-               </a>
-               <a href="{{route('customer.importForm')}}" data-title="Import Customer" data-bs-toggle="tooltip" class="btn btn-sm btn-info" data-bs-original-title="Import Customer">
-                  Import Customer
-               </a>
-               <!-- <a href="{{route('customer.importForm')}}" 
-                  data-title="Add New Customer" 
-                  data-bs-toggle="tooltip" 
-                  title="Add New Customer" 
-                  class="btn btn-sm btn-success">
-                  Add New Customer
-               </a> -->
-
-
+               </a>            
+               
             </div>
             <div class="card-body">
                @if (isset($data['customer_list']) && $data['customer_list']->count() > 0)
@@ -51,7 +40,7 @@
 <script src="{{asset('backend/assets/js/pages/customer.js')}}" type="text/javascript"></script>
 <script>
     var routes = {
-        customerIndex: "{{ route('manage-customer') }}",
+        customerIndex: "{{ route('manage-customer.index') }}",
     };
     var csrfToken = "{{ csrf_token() }}";
 </script>

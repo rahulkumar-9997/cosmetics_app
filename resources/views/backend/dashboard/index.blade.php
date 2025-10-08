@@ -109,7 +109,7 @@
                <div class="col-md-3">
                   <div class="card overflow-hidden">
                      <div class="card-body">
-                        <a href="{{route('manage-customer')}}">
+                        <a href="{{route('manage-customer.index')}}">
                            <div class="row">
                               <div class="col-3">
                                  <div class="avatar-md bg-soft-primary rounded">

@@ -196,9 +196,7 @@ Route::middleware(['auth', 'check.menu'])->group(function () {
     /*AUTOCOMPLETE  ROUTE*/
     Route::get('/autocomplete/vendors', [VendorController::class, 'autocomplete'])->name('autocomplete.vendors');
     Route::get('/autocomplete/products', [ProductsController::class, 'autocompleteProducts'])->name('autocomplete.products');
-    /*AUTOCOMPLETE ROUTE*/
-    /**Customer route */
-    Route::get('manage-customer', [CustomerControllerBackend::class, 'index'])->name('manage-customer');    
+    /*AUTOCOMPLETE ROUTE*/     
     
     Route::get('manage-group', [GroupController::class, 'groupList'])->name('manage-group');
     Route::get('add-new-group', [GroupController::class, 'addNewGrupModal'])->name('add-new-group');
@@ -249,4 +247,9 @@ Route::middleware(['auth', 'check.menu'])->group(function () {
     Route::resource('salesman', SalesManController::class);
     Route::post('salesman/{id}/status',[SalesManController::class, 'toggleStatus'])
     ->name('salesman.status');
+    /**Customer route */
+    Route::resource('manage-customer', CustomerControllerBackend::class);
+    Route::post('/manage-customer/{id}/status', [CustomerControllerBackend::class, 'toggleStatus'])->name('manage-customer.status');
+    Route::post('/manage-customer/{id}/approval', [CustomerControllerBackend::class, 'toggleApproval'])->name('manage-customer.approval');
+
 });

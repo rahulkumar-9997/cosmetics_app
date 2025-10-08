@@ -19,14 +19,14 @@
                         <div class="row">
                             <div class="col-lg-4">
                                 <div class="mb-3">
-                                    <label for="name" class="form-label fw-bold">Menu Name <span class="text-danger">*</span></label>
+                                    <label for="name" class="form-label">Menu Name <span class="text-danger">*</span></label>
                                     <input type="text" name="name" class="form-control" id="name" value="{{ old('name', $menu->name) }}" required>
                                 </div>
                             </div>
 
                             <div class="col-lg-4">
                                 <div class="mb-3">
-                                    <label for="url" class="form-label fw-bold">URL</label>
+                                    <label for="url" class="form-label">URL</label>
                                     <input type="text" name="url" class="form-control" id="url"
                                         value="{{ old('url', $menu->url) }}">
                                     <small class="text-muted">Enter route name or URL path</small>
@@ -35,7 +35,7 @@
 
                             <div class="col-lg-4">
                                 <div class="mb-3">
-                                    <label for="icon" class="form-label fw-bold">Menu Icon</label>
+                                    <label for="icon" class="form-label">Menu Icon</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="icon-preview">
                                             <iconify-icon icon="{{ old('icon', $menu->icon ?? 'solar:menu-dots-bold-duotone') }}"width="22" height="22"></iconify-icon>
@@ -58,7 +58,7 @@
                         <div class="row">
                             <div class="col-lg-4">
                                 <div class="mb-3">
-                                    <label for="parent_id" class="form-label fw-bold">Parent Menu</label>
+                                    <label for="parent_id" class="form-label">Parent Menu</label>
                                     <select name="parent_id" class="form-select" id="parent_id">
                                         <option value="">-- None --</option>
                                         @foreach($parentMenus as $parent)
@@ -73,14 +73,14 @@
 
                             <div class="col-lg-4">
                                 <div class="mb-3">
-                                    <label for="order" class="form-label fw-bold">Order</label>
+                                    <label for="order" class="form-label">Order</label>
                                     <input type="number" name="order" class="form-control" id="order" value="{{ old('order', $menu->order) }}" readonly>
                                 </div>
                             </div>
 
                             <div class="col-lg-4">
                                 <div class="mb-4">
-                                    <label for="is_active" class="form-label fw-bold">Status</label>
+                                    <label for="is_active" class="form-label">Status</label>
                                     <div class="form-check">
                                         <input type="checkbox" name="is_active" class="form-check-input" id="is_active" {{ old('is_active', $menu->is_active) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_active">Active</label>
@@ -90,7 +90,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Roles</label>
+                            <label class="form-label">Roles</label>
                             <div class="d-flex flex-wrap gap-3">
                                 @foreach($roles as $role)
                                 <div class="form-check">
