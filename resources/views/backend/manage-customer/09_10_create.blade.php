@@ -48,8 +48,13 @@
                             <div class="row mb-2">
                                 <div class="col-md-12">
                                     <label class="form-label">Search Address <span class="text-danger">*</span></label>
-                                    <input type="text" id="autocomplete-input" class="form-control" placeholder="Start typing address...">
-                                    <small class="form-text text-info">Type address and select from suggestions, or click directly on the map below</small>
+                                    <div class="input-group">
+                                        <input type="text" id="autocomplete-input" class="form-control" placeholder="Enter complete address and click search...">
+                                        <button type="button" id="searchAddressBtn" class="btn btn-primary">
+                                            <i class="ti ti-search me-1"></i> Search Address
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-info">Enter address and click search, or click directly on the map below</small>
                                 </div>
                             </div>
                             <div id="map" style="height: 300px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ddd;"></div>
@@ -103,7 +108,6 @@
     </div>
 </div>
 @endsection
-
 @push('styles')
 <style>
     #map {
@@ -127,43 +131,24 @@
         border-radius: 10px;
         border: 1px solid #dee2e6;
     }
-    
-    /* Autocomplete styling */
-    .pac-container {
-        z-index: 1050 !important;
-        border-radius: 0.375rem;
-        border: 1px solid #dee2e6;
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    #searchAddressBtn {
+        transition: all 0.3s ease;
     }
-    
-    .pac-item {
-        padding: 0.5rem 0.75rem;
-        border-bottom: 1px solid #f8f9fa;
-        cursor: pointer;
+    #searchAddressBtn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
-    
-    .pac-item:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .pac-item-query {
-        font-size: 1rem;
-        color: #495057;
-    }
-    
-    .pac-matched {
-        font-weight: 600;
+    .input-group {
+        max-width: 600px;
     }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    let map, marker, autocomplete;
-
+    let map, marker;
     function initMap() {
         console.log('Google Maps initialized successfully!');
-        
         document.getElementById('map').innerHTML = `
         <div class="map-loading">
             <div class="text-center">
@@ -173,7 +158,6 @@
                 <p class="text-muted">Loading Map...</p>
             </div>
         </div>`;
-        
         setTimeout(() => {
             try {
                 map = new google.maps.Map(document.getElementById("map"), {
@@ -187,7 +171,6 @@
                     zoomControl: true,
                     mapTypeControl: false
                 });
-
                 marker = new google.maps.Marker({
                     map: map,
                     position: {
@@ -197,82 +180,60 @@
                     draggable: true,
                     title: "Drag me to set location"
                 });
-
-                // Initialize autocomplete
-                initializeAutocomplete();
-
-                // Map click event
                 map.addListener("click", (event) => {
                     handleMapClick(event.latLng);
                 });
-
-                // Marker drag event
                 marker.addListener("dragend", function() {
                     const pos = marker.getPosition();
                     handleLocationUpdate(pos);
                 });
-
-                showAlert('Map loaded successfully! Start typing address or click on the map.', 'success');
-                
+                showAlert('Map loaded successfully! Click on the map or search for an address.', 'success');
             } catch (error) {
                 console.error('Error initializing map:', error);
                 showAlert('Error loading map. Please refresh the page.', 'danger');
             }
         }, 100);
     }
-
-    function initializeAutocomplete() {
-        const autocompleteInput = document.getElementById('autocomplete-input');
-        
-        // Create autocomplete with minimal configuration
-        autocomplete = new google.maps.places.Autocomplete(autocompleteInput, {
-            types: ['geocode'], // Only geographical addresses
-            componentRestrictions: { country: 'in' } // Optional: restrict to India
-        });
-
-        // When a place is selected from autocomplete
-        autocomplete.addListener('place_changed', () => {
-            const place = autocomplete.getPlace();
-            
-            if (!place.geometry) {
-                showAlert('No details available for this address. Please try another one.', 'warning');
-                return;
-            }
-
-            // Update map and marker
-            map.setCenter(place.geometry.location);
-            map.setZoom(15);
-            marker.setPosition(place.geometry.location);
-            updateCoordinates(place.geometry.location.lat(), place.geometry.location.lng());
-
-            // Fill address details
-            fillAddressDetails(place);
-            autoEnableSubmit();
-            
-            showAlert('Address selected! Location has been set on the map.', 'success');
-        });
-
-        // Prevent form submission when pressing enter on autocomplete
-        autocompleteInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-            }
-        });
-    }
-
     function handleMapClick(latLng) {
         marker.setPosition(latLng);
         handleLocationUpdate(latLng);
     }
-
     function handleLocationUpdate(location) {
         updateCoordinates(location.lat(), location.lng());
         reverseGeocode(location);
     }
-
+    function searchAddress() {
+        const addressInput = document.getElementById('autocomplete-input');
+        const address = addressInput.value.trim();
+        if (!address) {
+            showAlert('Please enter an address to search.', 'warning');
+            return;
+        }
+        const searchBtn = document.getElementById('searchAddressBtn');
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<i class="ti ti-loader ti-spin me-1"></i> Searching...';
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({
+            address: address
+        }, (results, status) => {
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '<i class="ti ti-search me-1"></i> Search Address';
+            if (status === "OK" && results[0]) {
+                const location = results[0].geometry.location;
+                map.setCenter(location);
+                map.setZoom(15);
+                marker.setPosition(location);
+                updateCoordinates(location.lat(), location.lng());
+                fillAddressDetails(results[0]);
+                autoEnableSubmit();
+                showAlert('Address found and location set automatically!', 'success');
+            } else {
+                showAlert('Address not found. Please try a different address or click on the map.', 'warning');
+            }
+        });
+    }
     function reverseGeocode(location) {
         const geocoder = new google.maps.Geocoder();
-        
         geocoder.geocode({
             location: location
         }, (results, status) => {
@@ -286,24 +247,16 @@
             }
         });
     }
-
     function fillAddressDetails(geocodeResult) {
         const components = geocodeResult.address_components || [];
         let country = '',
             state = '',
             city = '',
             postal_code = '';
-
-        console.log('All address components:', components);
-        
         components.forEach(c => {
             const types = c.types;
-            console.log('Component:', c.long_name, 'Types:', types);
-            
             if (types.includes('country')) country = c.long_name;
             if (types.includes('administrative_area_level_1')) state = c.long_name;
-            
-            // City detection with priority
             if (types.includes('locality')) {
                 city = c.long_name;
             } else if (types.includes('administrative_area_level_2') && !city) {
@@ -311,39 +264,27 @@
             } else if (types.includes('postal_town') && !city) {
                 city = c.long_name;
             }
-            
-            // Postal code detection
-            if (types.includes('postal_code')) {
-                postal_code = c.long_name;
-            }
+            if (types.includes('postal_code')) postal_code = c.long_name;
         });
-
-        // If postal code not found, try alternative methods
-        if (!postal_code && geocodeResult.formatted_address) {
-            const postalCodeRegex = /\b\d{5,6}\b/;
-            const match = geocodeResult.formatted_address.match(postalCodeRegex);
-            if (match) {
-                postal_code = match[0];
-                console.log('Found postal code via regex:', postal_code);
-            }
-        }
-
         document.getElementById('country').value = country;
         document.getElementById('state').value = state;
         document.getElementById('city').value = city;
         document.getElementById('postal_code').value = postal_code;
-
-        // Update the autocomplete input with formatted address
         if (geocodeResult.formatted_address) {
             document.getElementById('autocomplete-input').value = geocodeResult.formatted_address;
         }
-
-        // Make postal code editable if not found
         if (!postal_code) {
-            const postalInput = document.getElementById('postal_code');
-            postalInput.readOnly = false;
-            postalInput.placeholder = "Enter pin code manually";
-            showAlert('Pin code not found automatically. Please enter it manually.', 'warning');
+            const geocoder = new google.maps.Geocoder();
+            const location = geocodeResult.geometry.location;
+            geocoder.geocode({ location: location }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    results[0].address_components.forEach(c => {
+                        if (c.types.includes('postal_code')) {
+                            document.getElementById('postal_code').value = c.long_name;
+                        }
+                    });
+                }
+            });
         }
     }
 
@@ -351,7 +292,6 @@
         document.getElementById("latitude").value = lat.toFixed(6);
         document.getElementById("longitude").value = lng.toFixed(6);
     }
-
     function autoEnableSubmit() {
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
@@ -389,7 +329,6 @@
             }
         }, 4000);
     }
-
     function getAlertIcon(type) {
         const icons = {
             'success': 'circle-check',
@@ -399,10 +338,9 @@
         };
         return icons[type] || 'info-circle';
     }
-
     document.addEventListener('DOMContentLoaded', function() {
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBmvGbMx-92VviaYr2IvzjCyC4-DVEzQCU&libraries=maps,marker,places&v=weekly&callback=initMap`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBmvGbMx-92VviaYr2IvzjCyC4-DVEzQCU&callback=initMap`;
         script.async = true;
         script.defer = true;
         script.onerror = function() {
@@ -418,7 +356,13 @@
             `;
         };
         document.head.appendChild(script);
-
+        document.getElementById('searchAddressBtn').addEventListener('click', searchAddress);
+        document.getElementById('autocomplete-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchAddress();
+            }
+        });
         document.getElementById('customerForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn.disabled) {
@@ -436,7 +380,6 @@
             submitBtn.disabled = true;
         });
     });
-
     window.gm_authFailure = function() {
         showAlert('Google Maps authentication failed. Please check your API key configuration.', 'danger');
     };
