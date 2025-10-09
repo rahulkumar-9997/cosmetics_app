@@ -273,7 +273,21 @@
         if (geocodeResult.formatted_address) {
             document.getElementById('autocomplete-input').value = geocodeResult.formatted_address;
         }
+        if (!postal_code) {
+            const geocoder = new google.maps.Geocoder();
+            const location = geocodeResult.geometry.location;
+            geocoder.geocode({ location: location }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    results[0].address_components.forEach(c => {
+                        if (c.types.includes('postal_code')) {
+                            document.getElementById('postal_code').value = c.long_name;
+                        }
+                    });
+                }
+            });
+        }
     }
+
     function updateCoordinates(lat, lng) {
         document.getElementById("latitude").value = lat.toFixed(6);
         document.getElementById("longitude").value = lng.toFixed(6);
