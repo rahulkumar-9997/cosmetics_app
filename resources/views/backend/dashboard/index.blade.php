@@ -9,7 +9,10 @@
       <div class="row">
          <div class="col-xxl-12">
             <div class="row">
-               
+                @php
+                  $userRole = auth()->user()->roles->pluck('name')->first();
+               @endphp
+               <h1>{{ $userRole }}</h1>
                <div class="col-md-3">
                   <div class="card overflow-hidden">
                      <div class="card-body">

@@ -16,57 +16,80 @@ class MenuServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        // Compose menus for sidebar
         View::composer('backend.layouts.sidebar', function ($view) {
             $user = auth()->user();
             $menus = collect();
             if ($user) {
-                if ($user->hasRole('Super Admin (Wizards)')) {
-                    $menus = Menu::with(['children' => function ($query) {
-                        $query->active()->orderBy('order');
-                    }])
+                $menus = Menu::with([
+                    'childrenRecursive' => function ($q) use ($user) {
+                        $q->where('display_sidebar_status', 1)
+                            ->ordered()
+                            ->when(!$user->hasRole('Super Admin (Wizards)'), function ($q) use ($user) {
+                                $q->whereHas('roles', fn($roleQuery) => $roleQuery->whereIn('roles.id', $user->roles->pluck('id')))
+                                    ->orWhereHas('permissions', fn($permQuery) => $permQuery->whereIn('permissions.id', $user->getAllPermissions()->pluck('id')));
+                            })
+                            ->with(['roles', 'permissions', 'childrenRecursive']);
+                    },
+                    'roles',
+                    'permissions'
+                ])
                     ->parent()
                     ->active()
-                    ->orderBy('order')
-                    ->get();
-                } else {
-                    $menus = Menu::with(['children' => function ($query) use ($user) {
-                        $query->active()
-                              ->where(function ($q) use ($user) {
-                                  $this->applyAccessFilter($q, $user);
-                              })
-                              ->orderBy('order');
-                    }])
-                    ->parent()
-                    ->active()
-                    ->where(function ($query) use ($user) {
-                        $this->applyAccessFilter($query, $user);
+                    ->where('display_sidebar_status', 1)
+                    ->ordered()
+                    ->when(!$user->hasRole('Super Admin (Wizards)'), function ($q) use ($user) {
+                        $q->whereHas('roles', fn($roleQuery) => $roleQuery->whereIn('roles.id', $user->roles->pluck('id')))
+                            ->orWhereHas('permissions', fn($permQuery) => $permQuery->whereIn('permissions.id', $user->getAllPermissions()->pluck('id')));
                     })
-                    ->orderBy('order')
                     ->get();
-                }
+                $menus->each(fn($menu) => $this->processMenuRecursive($menu));
             }
-            $menus->each(function ($menu) {
-                $this->processMenuUrl($menu);
-                $menu->children->each(fn($child) => $this->processMenuUrl($child));
-            });
-
+            //dd(json_encode($menus, JSON_PRETTY_PRINT));
             $view->with('menus', $menus);
         });
     }
 
-    /**
-     * Convert menu url or route name to full URL.
-     */
+    private function filterMenuRecursive($menu, $user)
+    {
+        $hasAccess = $menu->roles->isEmpty() && $menu->permissions->isEmpty()
+            || $user->hasAnyRole($menu->roles->pluck('name')->toArray())
+            || $user->hasAnyPermission($menu->permissions->pluck('name')->toArray());
+
+        if (!$hasAccess || !$menu->display_sidebar_status) {
+            return null;
+        }
+        if ($menu->childrenRecursive->isNotEmpty()) {
+            $menu->childrenRecursive = $menu->childrenRecursive
+                ->map(fn($child) => $this->filterMenuRecursive($child, $user))
+                ->filter();
+        }
+
+        return $menu;
+    }
+
+    private function processMenuRecursive($menu)
+    {
+        $this->processMenuUrl($menu);
+
+        if ($menu->childrenRecursive->isNotEmpty()) {
+            $menu->childrenRecursive->each(fn($child) => $this->processMenuRecursive($child));
+        }
+    }
+
     private function processMenuUrl($menuItem)
     {
         if (!$menuItem->url) {
             $menuItem->resolved_url = '#';
             return;
         }
-
         if (Route::has($menuItem->url)) {
-            $menuItem->resolved_url = route($menuItem->url);
+            $route = Route::getRoutes()->getByName($menuItem->url);
+            $parameters = $route->parameterNames();
+            if (empty($parameters)) {
+                $menuItem->resolved_url = route($menuItem->url);
+            } else {
+                $menuItem->resolved_url = '#';
+            }
         } elseif (str_starts_with($menuItem->url, '/') || filter_var($menuItem->url, FILTER_VALIDATE_URL)) {
             $menuItem->resolved_url = url($menuItem->url);
         } else {
@@ -74,31 +97,18 @@ class MenuServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Filter menus based on user roles and permissions.
-     */
     private function applyAccessFilter($query, $user)
     {
         $query->where(function ($q) use ($user) {
-            // Public menus (no role or permission)
             $q->doesntHave('roles')->doesntHave('permissions');
-
-            // Menus assigned to user's roles
             if ($user->roles->count()) {
                 $roleIds = $user->roles->pluck('id');
-                $q->orWhereHas('roles', function ($roleQuery) use ($roleIds) {
-                    $roleQuery->whereIn('roles.id', $roleIds); // specify table name
-                });
+                $q->orWhereHas('roles', fn($roleQuery) => $roleQuery->whereIn('roles.id', $roleIds));
             }
-
-            // Menus assigned to user's permissions
             $userPermissionIds = $user->getAllPermissions()->pluck('id');
             if ($userPermissionIds->count()) {
-                $q->orWhereHas('permissions', function ($permQuery) use ($userPermissionIds) {
-                    $permQuery->whereIn('permissions.id', $userPermissionIds); // specify table name
-                });
+                $q->orWhereHas('permissions', fn($permQuery) => $permQuery->whereIn('permissions.id', $userPermissionIds));
             }
         });
     }
-
 }

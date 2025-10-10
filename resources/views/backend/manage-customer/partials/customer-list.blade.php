@@ -5,6 +5,7 @@
             <th>Sr. No.</th>
             <th style="width: 15%;">Firm Name</th>
             <th>Email / Phone</th>
+            <th>Address</th>
             <th>Status</th>
             <th>Approval Status</th>
             <th>Action</th>
@@ -24,12 +25,23 @@
                 <strong>Phone No.</strong> {{ $customer->phone_number ?? '-' }}
             </td>
             <td>
-                <div class="form-check form-switch">
-                    <input type="checkbox" class="form-check-input status-toggle"
-                        data-id="{{ $customer->id }}"
-                        data-url="{{ route('manage-customer.status', $customer->id) }}"
-                        {{ $customer->status ? 'checked' : '' }}>
-                </div>
+                {{ $customer->permanent_address ?? '-' }}
+            </td>
+            <td>
+                @if(auth()->check() && auth()->user()->hasAnyRole(['Super Admin (Wizards)', 'Main Admin (Owner)']))
+                    <div class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input status-toggle"
+                            data-id="{{ $customer->id }}"
+                            data-url="{{ route('manage-customer.status', $customer->id) }}"
+                            {{ $customer->status ? 'checked' : '' }}>                        
+                    </div>
+                @else
+                    @if($customer->status)
+                        <span class="badge bg-success">Active</span>
+                    @else
+                        <span class="badge bg-warning">Inactive</span>
+                    @endif
+                @endif
             </td>
             <td>
                 @if(auth()->check() && auth()->user()->hasAnyRole(['Super Admin (Wizards)', 'Main Admin (Owner)']))
@@ -52,16 +64,18 @@
             </td>
             <td>
                 <div class="d-flex gap-1">
-                    <a href="{{ route('manage-customer.edit', $customer->id) }}" class="btn btn-soft-success btn-sm">
+                    <a href="{{ route('manage-customer.edit', $customer) }}" class="btn btn-soft-success btn-sm">
                         <i class="ti ti-edit"></i>
                     </a>
-                    <form method="POST" action="{{ route('manage-customer.destroy', $customer->id) }}">
+
+                    <form action="{{ route('manage-customer.destroy', $customer) }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
-                        <a href="javascript:void(0);" class="show_confirm_customer btn btn-soft-danger btn-sm" data-name="{{ $customer->firm_name }}">
+                        <button type="submit" class="btn btn-sm btn-danger show_confirm_customer" data-name="{{ $customer->firm_name }}" title="Delete">
                             <i class="ti ti-trash"></i>
-                        </a>
+                        </button>
                     </form>
+
                 </div>
             </td>
 

@@ -39,7 +39,8 @@ use App\Http\Controllers\Backend\SocialMediaTrackController;
 use App\Http\Controllers\Backend\LandingPageController;
 use App\Http\Controllers\Backend\StorageController;
 use App\Http\Controllers\Backend\VideoController;
-use App\Http\Controllers\Backend\SalesManController;
+use App\Http\Controllers\Backend\CosmeticsApp\SalesManController;
+use App\Http\Controllers\Backend\CosmeticsApp\VisitCustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +77,7 @@ Route::middleware(['auth', 'check.menu'])->group(function () {
     Route::resource('menus', MenuController::class);
     Route::post('menus/{menu}/status', [MenuController::class, 'updateStatus'])->name('menus.status');
     Route::post('menus/reorder', [MenuController::class, 'reorder'])->name('menus.reorder');
+    Route::post('menus/{menu}/sidebar-status', [MenuController::class, 'updateSidebarStatus'])->name('menus.sidebar-status');
    
     Route::get('/profile', [UsersController::class, 'UserProfile'])->name('profile');
     Route::get('/profile/{id}/edit', [UsersController::class, 'UserProfileEditForm'])->name('profile.edit');
@@ -198,19 +200,19 @@ Route::middleware(['auth', 'check.menu'])->group(function () {
     Route::get('/autocomplete/products', [ProductsController::class, 'autocompleteProducts'])->name('autocomplete.products');
     /*AUTOCOMPLETE ROUTE*/     
     
-    Route::get('manage-group', [GroupController::class, 'groupList'])->name('manage-group');
-    Route::get('add-new-group', [GroupController::class, 'addNewGrupModal'])->name('add-new-group');
-    Route::Post('add-new-group/submit', [GroupController::class, 'addNewGrupModalSubmit'])->name('add-new-group.submit');
-    Route::get('edit-group/{id}', [GroupController::class, 'editGroupModal'])->name('edit-group');
-    Route::post('update-group/{id}', [GroupController::class, 'update'])->name('update-group.submit');
-    Route::delete('group/{id}', [GroupController::class, 'groupDelete'])->name('group.delete');
-    Route::get('manage-group-category', [GroupController::class, 'groupCategoryList'])->name('manage-group-category');
+    // Route::get('manage-group', [GroupController::class, 'groupList'])->name('manage-group');
+    // Route::get('add-new-group', [GroupController::class, 'addNewGrupModal'])->name('add-new-group');
+    // Route::Post('add-new-group/submit', [GroupController::class, 'addNewGrupModalSubmit'])->name('add-new-group.submit');
+    // Route::get('edit-group/{id}', [GroupController::class, 'editGroupModal'])->name('edit-group');
+    // Route::post('update-group/{id}', [GroupController::class, 'update'])->name('update-group.submit');
+    // Route::delete('group/{id}', [GroupController::class, 'groupDelete'])->name('group.delete');
+    // Route::get('manage-group-category', [GroupController::class, 'groupCategoryList'])->name('manage-group-category');
 
-    Route::post('add-new-group-category', [GroupController::class, 'addNewGrupCategoryModal'])->name('add-new-group-category');
-    Route::Post('add-new-group-category/submit', [GroupController::class, 'addNewGrupCategoryModalSubmit'])->name('add-new-group-category.submit');
-    Route::get('edit-group-category/{id}', [GroupController::class, 'editGroupCategoryModal'])->name('edit-group-category');
-    Route::post('update-group-category/{id}', [GroupController::class, 'editGroupCategoryModalSubmit'])->name('update-group-category.submit');
-    Route::delete('group-category/{id}', [GroupController::class, 'groupCategoryDelete'])->name('group-category.delete');
+    // Route::post('add-new-group-category', [GroupController::class, 'addNewGrupCategoryModal'])->name('add-new-group-category');
+    // Route::Post('add-new-group-category/submit', [GroupController::class, 'addNewGrupCategoryModalSubmit'])->name('add-new-group-category.submit');
+    // Route::get('edit-group-category/{id}', [GroupController::class, 'editGroupCategoryModal'])->name('edit-group-category');
+    // Route::post('update-group-category/{id}', [GroupController::class, 'editGroupCategoryModalSubmit'])->name('update-group-category.submit');
+    // Route::delete('group-category/{id}', [GroupController::class, 'groupCategoryDelete'])->name('group-category.delete');
     /**Customer route */
     /**Order Route */
     Route::get('order-list', [OrderControllerBackend::class, 'showAllOrderList'])->name('order-list');
@@ -251,5 +253,5 @@ Route::middleware(['auth', 'check.menu'])->group(function () {
     Route::resource('manage-customer', CustomerControllerBackend::class);
     Route::post('/manage-customer/{id}/status', [CustomerControllerBackend::class, 'toggleStatus'])->name('manage-customer.status');
     Route::post('/manage-customer/{id}/approval', [CustomerControllerBackend::class, 'toggleApproval'])->name('manage-customer.approval');
-
+    Route::get('visit-customer', [VisitCustomerController::class, 'index'])->name('visit-customer');
 });

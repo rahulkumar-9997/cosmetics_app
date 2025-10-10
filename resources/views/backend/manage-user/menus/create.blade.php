@@ -64,13 +64,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
+                            <div class="col-lg-2">
                                 <div class="mb-3">
                                     <label for="order" class="form-label">Order <span class="text-danger">*</span></label>
                                     <input type="number" name="order" class="form-control" id="order" value="{{ old('order', $nextOrder) }}" readonly>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
                                 <div class="mb-4">
                                     <label for="order" class="form-label">Status <span class="text-danger">*</span></label>
                                     <div class="form-check">
@@ -79,6 +79,19 @@
                                             class="form-check-input"
                                             id="is_active"
                                             {{ old('is_active', true) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="is_active">Active</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="mb-4">
+                                    <label for="order" class="form-label">This Menu Display in Sidebar Menu <span class="text-danger">*</span></label>
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                            name="display_sidebar_status"
+                                            class="form-check-input"
+                                            id="display_sidebar_status"
+                                            {{ old('display_sidebar_status', true) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_active">Active</label>
                                     </div>
                                 </div>

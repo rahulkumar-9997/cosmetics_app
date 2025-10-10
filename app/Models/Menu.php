@@ -14,13 +14,14 @@ class Menu extends Model
         'icon', 
         'parent_id', 
         'order', 
-        'is_active'
+        'is_active',
+        'display_sidebar_status'
     ];
 
-    // Note: 'order' might be a reserved keyword, so we might need to handle it
     protected $casts = [
         'is_active' => 'boolean',
-        'order' => 'integer'
+        'order' => 'integer',
+        'display_sidebar_status' => 'boolean',
     ];
 
     public function roles()
@@ -42,7 +43,6 @@ class Menu extends Model
     {
         return $this->belongsTo(Menu::class, 'parent_id');
     }
-
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -56,5 +56,11 @@ class Menu extends Model
     public function scopeOrdered($query)
     {
         return $query->orderBy('order');
+    }
+
+    
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
     }
 }

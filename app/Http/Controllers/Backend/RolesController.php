@@ -18,7 +18,7 @@ class RolesController extends Controller
     {
         // $permissions = Permission::all()->groupBy('module');
         // return view('backend.manage-user.roles.create', compact('permissions'));
-        $menus = Menu::with('children')->whereNull('parent_id')->orderBy('order')->get();
+        $menus = Menu::with('children')->whereNull('parent_id')->where('is_active', 1)->orderBy('order')->get();
         return view('backend.manage-user.roles.create', compact('menus'));
     }
 
@@ -71,7 +71,7 @@ class RolesController extends Controller
         // $permissions = Permission::all()->groupBy('module'); 
         // $rolePermissions = $role->permissions->pluck('id')->toArray();
         // return view('backend.manage-user.roles.edit', compact('role', 'permissions', 'rolePermissions'));
-        $menus = Menu::with('children')->whereNull('parent_id')->orderBy('order')->get();
+        $menus = Menu::with('children')->whereNull('parent_id')->where('is_active', 1)->orderBy('order')->get();
         $assignedMenus = $role->menus()->pluck('menus.id')->toArray();
         return view('backend.manage-user.roles.edit', compact('role', 'menus', 'assignedMenus'));
     }

@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Backend;
-
+namespace App\Http\Controllers\Backend\CosmeticsApp;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -86,7 +85,6 @@ class SalesManController extends Controller
         ]);
     }
 
-
     public function store(Request $request){
         $request->validate([
             'name' => 'required|string|max:255',
@@ -152,6 +150,9 @@ class SalesManController extends Controller
                     'status' => $request->has('status') ? 1 : 0,
                     'user_type' => 'salesman',
                 ]);
+                /* Automatically assign "Salesman" role (id = 3) */
+                $user->roles()->sync([3]);
+                /* Automatically assign "Salesman" role (id = 3) */
                 $userIdForSalesman = $user->id; 
             }
             $salesman = Salesman::create([
@@ -341,6 +342,9 @@ class SalesManController extends Controller
                     'status' => $request->has('status') ? 1 : 0,
                     'user_type' => 'salesman',
                 ]);
+                /* Automatically assign "Salesman" role (role_id = 3)*/
+                $user->roles()->sync([3]);
+                /* Automatically assign "Salesman" role (role_id = 3)*/
                 $salesman->user_id = $user->id;
             }
             $salesman->update([

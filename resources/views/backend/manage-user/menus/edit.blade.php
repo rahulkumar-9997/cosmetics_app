@@ -71,19 +71,28 @@
                                 </div>
                             </div>
 
-                            <div class="col-lg-4">
+                            <div class="col-lg-2">
                                 <div class="mb-3">
                                     <label for="order" class="form-label">Order</label>
                                     <input type="number" name="order" class="form-control" id="order" value="{{ old('order', $menu->order) }}" readonly>
                                 </div>
                             </div>
 
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
                                 <div class="mb-4">
                                     <label for="is_active" class="form-label">Status</label>
                                     <div class="form-check">
                                         <input type="checkbox" name="is_active" class="form-check-input" id="is_active" {{ old('is_active', $menu->is_active) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="is_active">Active</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="mb-4">
+                                    <label for="display_sidebar_status" class="form-label">This Menu Display in Sidebar Menu *</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" name="display_sidebar_status" class="form-check-input" id="display_sidebar_status" {{ old('display_sidebar_status', $menu->display_sidebar_status) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="display_sidebar_status">Active</label>
                                     </div>
                                 </div>
                             </div>

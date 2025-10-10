@@ -37,6 +37,7 @@ class MenuController extends Controller
     {
         $request->merge([
             'is_active' => $request->has('is_active'),
+            'display_sidebar_status' => $request->has('display_sidebar_status'),
         ]);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -45,6 +46,7 @@ class MenuController extends Controller
             'parent_id' => 'nullable|exists:menus,id',
             'order' => 'nullable|integer|min:1',
             'is_active' => 'boolean',
+            'display_sidebar_status' => 'boolean',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id',
         ]);
@@ -57,6 +59,7 @@ class MenuController extends Controller
                 'parent_id' => $validated['parent_id'] ?? null,
                 'order' => $validated['order'],
                 'is_active' => $request->has('is_active'),
+                'display_sidebar_status' => $request->has('display_sidebar_status'),
             ]);
             if (!empty($validated['roles'])) {
                 $menu->roles()->sync($validated['roles']);
@@ -86,6 +89,7 @@ class MenuController extends Controller
         $menu = Menu::findOrFail($id);
         $request->merge([
             'is_active' => $request->has('is_active'),
+            'display_sidebar_status' => $request->has('display_sidebar_status'),
         ]);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -94,6 +98,7 @@ class MenuController extends Controller
             'parent_id' => 'nullable|exists:menus,id',
             'order' => 'nullable|integer|min:1',
             'is_active' => 'boolean',
+            'display_sidebar_status' => 'boolean',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id',
         ]);
@@ -107,6 +112,7 @@ class MenuController extends Controller
                 'parent_id' => $validated['parent_id'] ?? null,
                 'order' => $validated['order'],
                 'is_active' => $request->has('is_active'),
+                'display_sidebar_status' => $request->has('display_sidebar_status'),
             ]);
             if (!empty($validated['roles'])) {
                 $menu->roles()->sync($validated['roles']);
@@ -190,6 +196,30 @@ class MenuController extends Controller
             Menu::where('id', $id)->update(['order' => $index + 1]);
         }
         return response()->json(['status' => true, 'message' => 'Menu order updated successfully.']);
+    }
+
+    public function updateSidebarStatus(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'display_sidebar_status' => 'required|boolean',
+            ]);
+            $menu = Menu::findOrFail($id);
+            
+            $menu->display_sidebar_status = $request->display_sidebar_status;
+            $menu->save();
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Menu sidebar visibility updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Menu sidebar status update failed: '.$e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function getMenuIcons()

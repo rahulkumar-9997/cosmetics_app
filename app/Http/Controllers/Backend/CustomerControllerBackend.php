@@ -40,7 +40,9 @@ class CustomerControllerBackend extends Controller
             'state' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'pin_code' => 'nullable|digits:6',
-            'permanent_address' => 'nullable|string',
+            'latitude' => 'nullable|string',
+            'longitude' => 'nullable|string',
+            'full_addresses' => 'required|string',
             'profile_img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:8192',
             'status' => 'nullable|boolean',
         ]);
@@ -60,6 +62,10 @@ class CustomerControllerBackend extends Controller
                 $img = Image::make($image->getRealPath())->encode('webp', 100);
                 $img->save($destination_path . $imageName);
             }
+            $approvalStatus = 0; 
+            if (Auth::check() && Auth::user()->hasAnyRole(['Super Admin (Wizards)', 'Main Admin (Owner)'])) {
+                $approvalStatus = 1;
+            }
             $customer = Customer::create([
                 'firm_name' => $validated['firm_name'],
                 'contact_person' => $validated['contact_person'] ?? null,
@@ -70,9 +76,12 @@ class CustomerControllerBackend extends Controller
                 'state' => $validated['state'] ?? null,
                 'city' => $validated['city'] ?? null,
                 'pin_code' => $validated['pin_code'] ?? null,
-                'permanent_address' => $validated['permanent_address'] ?? null,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'permanent_address' => $validated['full_addresses'] ?? null,
                 'profile_img' => $imageName,
                 'status' => $request->has('status') ? true : false,
+                'approval_status' => $approvalStatus,
                 'added_by' => Auth::check() ? Auth::id() : null,
                 'password' => Hash::make('defaultpassword'),
             ]);
@@ -96,35 +105,45 @@ class CustomerControllerBackend extends Controller
     public function update(Request $request, $id)
     {
         $customer = Customer::findOrFail($id);
+        
         $request->merge([
             'status' => $request->has('status') ? 1 : 0
         ]);
+        
         $validated = $request->validate([
             'firm_name' => 'required|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'phone_number' => ['nullable','regex:/^(\+91)?[6-9]\d{9}$/'],
-            'email' => 'nullable|email|unique:customers,email,' . $customer->id,
+            'email' => 'nullable|email|unique:customers,email,' . $id,
             'gst_no' => ['nullable','regex:/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}[Z]{1}[A-Z0-9]{1}$/'],
             'country' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'pin_code' => 'nullable|digits:6',
-            'permanent_address' => 'nullable|string',
+            'latitude' => 'nullable|string',
+            'longitude' => 'nullable|string',
+            'full_addresses' => 'required|string',
             'profile_img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:8192',
             'status' => 'nullable|boolean',
         ]);
+        $imageName = $customer->profile_img;
+        $oldImagePath = null;        
         DB::beginTransaction();
         try {
-            $imageName = $customer->profile_img;
-            if ($request->hasFile('profile_img')) {
+            if ($request->has('remove_profile_img') && $request->remove_profile_img == 1) {
+                if ($imageName && file_exists(public_path('images/customer/' . $imageName))) {
+                    $oldImagePath = public_path('images/customer/' . $imageName);
+                }
+                $imageName = null;
+            } elseif ($request->hasFile('profile_img')) {
                 $image = $request->file('profile_img');
                 $destination_path = public_path('images/customer/');
                 if (!file_exists($destination_path)) {
                     mkdir($destination_path, 0777, true);
                 }
-                if ($customer->profile_img && file_exists($destination_path . $customer->profile_img)) {
-                    unlink($destination_path . $customer->profile_img);
-                }
+                if ($imageName && file_exists(public_path('images/customer/' . $imageName))) {
+                    $oldImagePath = public_path('images/customer/' . $imageName);
+                }                
                 $slugFirmName = Str::slug($validated['firm_name']);
                 $imageName = $slugFirmName . '_' . time() . '.webp';
                 $img = Image::make($image->getRealPath())->encode('webp', 100);
@@ -140,17 +159,23 @@ class CustomerControllerBackend extends Controller
                 'state' => $validated['state'] ?? null,
                 'city' => $validated['city'] ?? null,
                 'pin_code' => $validated['pin_code'] ?? null,
-                'permanent_address' => $validated['permanent_address'] ?? null,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'permanent_address' => $validated['full_addresses'] ?? null,
                 'profile_img' => $imageName,
                 'status' => $request->has('status') ? true : false,
+                'updated_by' => Auth::check() ? Auth::id() : null,
             ]);
             DB::commit();
-            return redirect()->route('manage-customer.index')->with('success', 'Customer updated successfully.');
+            if ($oldImagePath && file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }            
+            return redirect()->route('manage-customer.index')->with('success', 'Customer updated successfully.');            
         } catch (\Exception $e) {
             DB::rollBack();
-            if (isset($imageName) && $imageName !== $customer->profile_img && file_exists(public_path('images/customer/' . $imageName))) {
+            if ($request->hasFile('profile_img') && $imageName && file_exists(public_path('images/customer/' . $imageName))) {
                 unlink(public_path('images/customer/' . $imageName));
-            }
+            }            
             return redirect()->back()->withInput()->withErrors(['error' => 'Something went wrong: ' . $e->getMessage()]);
         }
     }

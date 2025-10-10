@@ -37,11 +37,5 @@
 <!-- modal--->
 @endsection
 @push('scripts')
-<script src="{{asset('backend/assets/js/pages/customer.js')}}" type="text/javascript"></script>
-<script>
-    var routes = {
-        customerIndex: "{{ route('manage-customer.index') }}",
-    };
-    var csrfToken = "{{ csrf_token() }}";
-</script>
+<script src="{{asset('backend/assets/js/pages/cosmetics-js/customer-status.js')}}" type="text/javascript"></script>
 @endpush
