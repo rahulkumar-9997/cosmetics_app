@@ -13,7 +13,7 @@
                     <h4 class="card-title flex-grow-1">Visit Customer List</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{route('product.store')}}" accept-charset="UTF-8" id="product_form" enctype="multipart/form-data">
+                    <form method="POST" action="" accept-charset="UTF-8" id="selectCutstomer" enctype="multipart/form-data">
                         @csrf
                         <div class="row">                            
                             <div class="col-lg-6">
